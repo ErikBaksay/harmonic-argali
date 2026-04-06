@@ -1,0 +1,60 @@
+:root {
+  color-scheme: light;
+  --ha-ivory: #f6f0e4;
+  --ha-ivory-strong: #efe4cf;
+  --ha-graphite: #151618;
+  --ha-graphite-soft: #24272c;
+  --ha-ink: #2e3034;
+  --ha-gold: #c8a760;
+  --ha-gold-soft: #ead4a2;
+  --ha-rose: #b17667;
+  --ha-alert: #fff3d0;
+  --ha-panel: rgba(255, 252, 246, 0.7);
+  --ha-border: rgba(43, 35, 20, 0.12);
+  --ha-shadow: 0 22px 70px rgba(30, 22, 12, 0.16);
+  --ha-ui-font: 'Manrope', sans-serif;
+  --ha-display-font: 'Cormorant Garamond', serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--ha-ui-font);
+  background:
+    radial-gradient(circle at top left, rgba(200, 167, 96, 0.25), transparent 30%),
+    radial-gradient(circle at 85% 15%, rgba(177, 118, 103, 0.12), transparent 26%),
+    linear-gradient(180deg, #f7f2e8 0%, #f0e6d7 45%, #e6d7c0 100%);
+  color: var(--ha-graphite);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

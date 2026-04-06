@@ -1,0 +1,295 @@
+<div class="app-shell" (pointerdown)="unlockAudio()">
+  <div class="ambient ambient--left" aria-hidden="true"></div>
+  <div class="ambient ambient--right" aria-hidden="true"></div>
+
+  <button
+    class="sidebar-backdrop"
+    [class.sidebar-backdrop--visible]="sidebarExpanded()"
+    type="button"
+    (click)="closeSidebar()"
+    [disabled]="!sidebarExpanded()"
+    aria-label="Close preset sidebar"
+  ></button>
+
+  <div class="preset-dock panel" [class.preset-dock--hidden]="sidebarExpanded()">
+    <button class="preset-dock__toggle button button--ghost button--icon" type="button" (click)="toggleSidebar()">
+      <i class="fa-solid fa-chevron-right"></i>
+      <span class="sr-only">Open preset drawer</span>
+    </button>
+
+    @if (hasPresets()) {
+      <div class="preset-dock__list">
+        @for (preset of presets(); track trackPreset($index, preset)) {
+          <button
+            class="preset-dock__item"
+            [class.preset-dock__item--selected]="preset.id === selectedPresetId()"
+            [class.preset-dock__item--active]="preset.id === timerState().activePresetId"
+            type="button"
+            (click)="selectPreset(preset)"
+            [attr.aria-label]="preset.name"
+          >
+            <app-icon-preview [iconClass]="preset.iconClass" [label]="preset.name" size="compact"></app-icon-preview>
+          </button>
+        }
+      </div>
+    }
+
+    <button class="preset-dock__create button button--ghost button--icon" type="button" (click)="openNewPresetSheet()">
+      <i class="fa-solid fa-plus"></i>
+      <span class="sr-only">Create new preset</span>
+    </button>
+  </div>
+
+  <aside class="preset-drawer panel" [class.preset-drawer--open]="sidebarExpanded()">
+    <div class="preset-drawer__top">
+      <button class="button button--ghost button--icon" type="button" (click)="closeSidebar()">
+        <i class="fa-solid fa-chevron-left"></i>
+        <span class="sr-only">Close preset drawer</span>
+      </button>
+
+      <div class="preset-drawer__heading">
+        <p class="eyebrow">Presets</p>
+        <p class="preset-drawer__subhead">Quick switch or manage your timer list.</p>
+      </div>
+    </div>
+
+    <div class="preset-drawer__list">
+      @for (preset of presets(); track trackPreset($index, preset)) {
+        <article
+          class="preset-nav"
+          [class.preset-nav--selected]="preset.id === selectedPresetId()"
+          [class.preset-nav--active]="preset.id === timerState().activePresetId"
+        >
+          <button class="preset-nav__button" type="button" (click)="selectPreset(preset)" [attr.aria-label]="preset.name">
+            <app-icon-preview [iconClass]="preset.iconClass" [label]="preset.name"></app-icon-preview>
+            <span class="preset-nav__copy">
+              <span class="preset-nav__name">{{ preset.name }}</span>
+              <span class="preset-nav__details">{{ describePreset(preset) }}</span>
+            </span>
+          </button>
+
+          <div class="preset-nav__actions">
+            <button class="button button--ghost button--small" type="button" (click)="editPreset(preset)">
+              Edit
+            </button>
+            <button class="button button--ghost button--small" type="button" (click)="deletePreset(preset)">
+              Delete
+            </button>
+          </div>
+        </article>
+      }
+
+      @if (!hasPresets()) {
+        <div class="preset-drawer__empty">
+          <p>No presets yet. Add one to start building your timer library.</p>
+        </div>
+      }
+    </div>
+
+    <div class="preset-drawer__footer">
+      <button class="button button--ghost" type="button" (click)="openNewPresetSheet()">
+        <i class="fa-solid fa-plus"></i>
+        <span>New preset</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="app-layout">
+    <div class="app-main">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Harmonic Argali</p>
+          <h1>Repeating timer</h1>
+          <p class="app-header__lead">Elegant loops, clear pacing, zero clutter.</p>
+        </div>
+        <button class="button button--ghost button--icon" type="button" (click)="toggleMute()">
+          <i [class]="timerState().muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high'"></i>
+          <span class="sr-only">{{ timerState().muted ? 'Unmute chime' : 'Mute chime' }}</span>
+        </button>
+      </header>
+
+      <section class="timer-stage panel" [class.timer-stage--alert]="timerState().phase === 'alert'">
+        <div class="timer-stage__ornament timer-stage__ornament--top" aria-hidden="true"></div>
+        <div class="timer-stage__ornament timer-stage__ornament--bottom" aria-hidden="true"></div>
+
+        <div class="timer-stage__status">
+          <div class="timer-stage__status-copy">
+            <p class="eyebrow">{{ timerHeadline() }}</p>
+            <p class="timer-stage__summary">{{ timerSummary() }}</p>
+          </div>
+
+          <button
+            class="current-preset"
+            type="button"
+            (click)="hasPresets() ? toggleSidebar() : openNewPresetSheet()"
+          >
+            <app-icon-preview
+              [iconClass]="displayPreset()?.iconClass ?? 'fa-solid fa-hourglass-half'"
+              [label]="displayPreset()?.name ?? 'Timer icon'"
+            />
+            <span class="current-preset__copy">
+              <span class="current-preset__name">{{ displayPreset()?.name ?? 'No preset yet' }}</span>
+              <span class="current-preset__details">{{ currentPresetDetails() }}</span>
+            </span>
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="timer-stage__clock-wrap">
+          <p class="timer-stage__phase-label">{{ cycleLabel() }}</p>
+          <div class="timer-stage__clock">{{ displayTime() }}</div>
+          <div class="timer-stage__meta" [class.timer-stage__meta--single]="!displayPreset()">
+            <span>{{ repeatSummary() }}</span>
+            @if (displayPreset()) {
+              <span>{{ formatClock(displayPreset()!.durationSeconds) }} each cycle</span>
+            }
+          </div>
+        </div>
+
+        <div class="progress-rail" aria-hidden="true">
+          <div class="progress-rail__fill" [style.width.%]="progressPercent()"></div>
+        </div>
+
+        @if (displayPreset()) {
+          <section class="run-panel">
+            <div class="run-panel__header">
+              <span class="eyebrow">Run settings</span>
+              <span class="run-panel__summary">{{ repeatSummary() }}</span>
+            </div>
+
+            <form class="run-settings" [formGroup]="runForm">
+              <label class="field">
+                <span>Loop mode</span>
+                <select formControlName="repeatMode">
+                  <option value="preset">Use preset default</option>
+                  <option value="infinite">Repeat until stopped</option>
+                  <option value="count">Run a fixed number of cycles</option>
+                </select>
+              </label>
+
+              <label class="field" [class.field--hidden]="runForm.controls.repeatMode.value !== 'count'">
+                <span>Cycle count</span>
+                <input formControlName="repeatCount" type="number" min="1" max="999" inputmode="numeric" />
+              </label>
+            </form>
+
+            @if (showRunRepeatError()) {
+              <p class="field-error">Choose a cycle count between 1 and 999.</p>
+            }
+          </section>
+        }
+
+        <div class="control-row control-row--primary">
+          @if (timerState().phase === 'idle' || timerState().phase === 'completed') {
+            <button class="button button--primary button--wide" type="button" (click)="startSelectedPreset()" [disabled]="!canStart()">
+              Start
+            </button>
+          }
+
+          @if (timerState().phase === 'running' || timerState().phase === 'alert') {
+            <button class="button button--primary button--wide" type="button" (click)="pauseTimer()">Pause</button>
+          }
+
+          @if (timerState().phase === 'paused') {
+            <button class="button button--primary button--wide" type="button" (click)="resumeTimer()">Resume</button>
+          }
+
+          <button
+            class="button button--ghost"
+            type="button"
+            (click)="stopTimer()"
+            [disabled]="timerState().phase === 'idle'"
+          >
+            Stop
+          </button>
+        </div>
+
+        @if (timerState().phase === 'alert') {
+          <div class="alert-ribbon">
+            <i class="fa-solid fa-bell"></i>
+            <span>Flashing for {{ timerState().remainingSeconds }} more second(s).</span>
+          </div>
+        }
+
+        @if (timerState().phase === 'completed') {
+          <div class="alert-ribbon alert-ribbon--complete">
+            <i class="fa-solid fa-check"></i>
+            <span>The requested cycle count finished. Start again or choose another preset.</span>
+          </div>
+        }
+      </section>
+    </div>
+  </main>
+
+  @if (isSheetOpen()) {
+    <div class="sheet-backdrop" (click)="closeSheet()">
+      <section class="sheet panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        @if (isEditorSheetOpen()) {
+          <div class="sheet__header">
+            <div>
+              <p class="eyebrow">Preset editor</p>
+              <h2>{{ editingPresetId() ? 'Edit preset' : 'Create preset' }}</h2>
+            </div>
+            <button class="button button--ghost button--icon" type="button" (click)="closeSheet()">
+              <i class="fa-solid fa-xmark"></i>
+              <span class="sr-only">Close editor</span>
+            </button>
+          </div>
+
+          <form class="editor-form" [formGroup]="presetForm" (ngSubmit)="savePreset()">
+            <div class="editor-preview">
+              <app-icon-preview [iconClass]="previewIconClass()" label="Preset preview" size="large" />
+              <p class="editor-preview__text">Live preview for the selected icon class.</p>
+            </div>
+
+            <label class="field">
+              <span>Name</span>
+              <input formControlName="name" type="text" placeholder="Focus sprint" maxlength="40" />
+            </label>
+            @if (showPresetError('name')) {
+              <p class="field-error">Give the preset a short name.</p>
+            }
+
+            <label class="field">
+              <span>Duration</span>
+              <input formControlName="duration" type="text" placeholder="01:00" inputmode="numeric" />
+            </label>
+            @if (showPresetError('duration')) {
+              <p class="field-error">Use the format mm:ss and make it longer than 00:00.</p>
+            }
+
+            <label class="field">
+              <span>Font Awesome class</span>
+              <input formControlName="iconClass" type="text" placeholder="fa-solid fa-hourglass-half" />
+            </label>
+            <p class="field-note">Invalid icon classes fall back to a bell so the preset still stays usable.</p>
+
+            <label class="field">
+              <span>Default repeat mode</span>
+              <select formControlName="repeatMode">
+                <option value="infinite">Repeat until stopped</option>
+                <option value="count">Fixed number of cycles</option>
+              </select>
+            </label>
+
+            <label class="field" [class.field--hidden]="presetForm.controls.repeatMode.value !== 'count'">
+              <span>Default cycle count</span>
+              <input formControlName="repeatCount" type="number" min="1" max="999" inputmode="numeric" />
+            </label>
+            @if (showPresetError('repeatCount')) {
+              <p class="field-error">Choose a cycle count between 1 and 999.</p>
+            }
+
+            <div class="editor-form__footer">
+              <button class="button button--primary button--wide" type="submit">
+                {{ editingPresetId() ? 'Save changes' : 'Create preset' }}
+              </button>
+            </div>
+          </form>
+        }
+      </section>
+    </div>
+  }
+
+  <div class="flash-overlay" [class.flash-overlay--visible]="timerState().phase === 'alert'" aria-hidden="true"></div>
+</div>
