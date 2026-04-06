@@ -7,6 +7,7 @@ interface PersistedStateV1 {
   presets: Preset[];
   selectedPresetId: string | null;
   muted: boolean;
+  visualAlertsEnabled: boolean;
 }
 
 export const APP_STORAGE_KEY = 'harmonic-argali.storage.v1';
@@ -17,12 +18,14 @@ export class PresetStorageService {
   readonly presets = signal<Preset[]>([]);
   readonly selectedPresetId = signal<string | null>(null);
   readonly muted = signal(false);
+  readonly visualAlertsEnabled = signal(true);
 
   constructor() {
     const snapshot = this.loadSnapshot();
     this.presets.set(snapshot.presets);
     this.selectedPresetId.set(snapshot.selectedPresetId);
     this.muted.set(snapshot.muted);
+    this.visualAlertsEnabled.set(snapshot.visualAlertsEnabled);
   }
 
   upsertPreset(input: PresetInput): Preset {
@@ -81,12 +84,18 @@ export class PresetStorageService {
     this.persist();
   }
 
+  setVisualAlertsEnabled(enabled: boolean): void {
+    this.visualAlertsEnabled.set(enabled);
+    this.persist();
+  }
+
   private loadSnapshot(): PersistedStateV1 {
     const fallbackState: PersistedStateV1 = {
       version: APP_STORAGE_VERSION,
       presets: [],
       selectedPresetId: null,
       muted: false,
+      visualAlertsEnabled: true,
     };
 
     if (typeof localStorage === 'undefined') {
@@ -117,6 +126,8 @@ export class PresetStorageService {
         presets,
         selectedPresetId,
         muted: Boolean(parsed.muted),
+        visualAlertsEnabled:
+          typeof parsed.visualAlertsEnabled === 'boolean' ? parsed.visualAlertsEnabled : fallbackState.visualAlertsEnabled,
       };
 
       this.persistSnapshot(snapshot);
@@ -137,6 +148,7 @@ export class PresetStorageService {
       presets: this.presets(),
       selectedPresetId: this.selectedPresetId(),
       muted: this.muted(),
+      visualAlertsEnabled: this.visualAlertsEnabled(),
     });
   }
 

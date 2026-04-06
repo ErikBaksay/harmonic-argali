@@ -102,10 +102,18 @@
           <h1>Repeating timer</h1>
           <p class="app-header__lead">Elegant loops, clear pacing, zero clutter.</p>
         </div>
-        <button class="button button--ghost button--icon" type="button" (click)="toggleMute()">
-          <i [class]="timerState().muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high'"></i>
-          <span class="sr-only">{{ timerState().muted ? 'Unmute chime' : 'Mute chime' }}</span>
-        </button>
+        <div class="app-header__actions">
+          <button class="button button--ghost button--icon" type="button" (click)="toggleVisualAlerts()">
+            <i [class]="timerState().visualAlertsEnabled ? 'fa-solid fa-lightbulb' : 'fa-solid fa-eye-slash'"></i>
+            <span class="sr-only">
+              {{ timerState().visualAlertsEnabled ? 'Turn visual alert pulse off' : 'Turn visual alert pulse on' }}
+            </span>
+          </button>
+          <button class="button button--ghost button--icon" type="button" (click)="toggleMute()">
+            <i [class]="timerState().muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high'"></i>
+            <span class="sr-only">{{ timerState().muted ? 'Unmute chime' : 'Mute chime' }}</span>
+          </button>
+        </div>
       </header>
 
       <section class="timer-stage panel" [class.timer-stage--alert]="timerState().phase === 'alert'">
@@ -207,7 +215,7 @@
         @if (timerState().phase === 'alert') {
           <div class="alert-ribbon">
             <i class="fa-solid fa-bell"></i>
-            <span>Flashing for {{ timerState().remainingSeconds }} more second(s).</span>
+            <span>Alert active for {{ timerState().remainingSeconds }} more second(s).</span>
           </div>
         }
 
@@ -291,5 +299,5 @@
     </div>
   }
 
-  <div class="flash-overlay" [class.flash-overlay--visible]="timerState().phase === 'alert'" aria-hidden="true"></div>
+  <div class="flash-overlay" [class.flash-overlay--visible]="showVisualAlertPulse()" aria-hidden="true"></div>
 </div>

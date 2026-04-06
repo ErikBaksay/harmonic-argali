@@ -34,6 +34,7 @@ export interface TimerState {
   currentCycle: number;
   targetCycleCount: number | null;
   muted: boolean;
+  visualAlertsEnabled: boolean;
   alertEndsAt: number | null;
   phaseEndsAt: number | null;
   phaseStartedAt: number | null;

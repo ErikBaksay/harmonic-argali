@@ -26,6 +26,7 @@ const INITIAL_TIMER_STATE: TimerState = {
   currentCycle: 0,
   targetCycleCount: null,
   muted: false,
+  visualAlertsEnabled: true,
   alertEndsAt: null,
   phaseEndsAt: null,
   phaseStartedAt: null,
@@ -50,11 +51,22 @@ export class TimerEngineService {
   private phaseDurationMs = 0;
 
   constructor() {
-    this.state.update((state) => ({ ...state, muted: this.storage.muted() }));
+    this.state.update((state) => ({
+      ...state,
+      muted: this.storage.muted(),
+      visualAlertsEnabled: this.storage.visualAlertsEnabled(),
+    }));
 
     effect(() => {
       const muted = this.storage.muted();
       this.state.update((state) => (state.muted === muted ? state : { ...state, muted }));
+    });
+
+    effect(() => {
+      const visualAlertsEnabled = this.storage.visualAlertsEnabled();
+      this.state.update((state) =>
+        state.visualAlertsEnabled === visualAlertsEnabled ? state : { ...state, visualAlertsEnabled },
+      );
     });
 
     this.destroyRef.onDestroy(() => this.clearTicker());
@@ -127,11 +139,16 @@ export class TimerEngineService {
     this.state.set({
       ...INITIAL_TIMER_STATE,
       muted: this.storage.muted(),
+      visualAlertsEnabled: this.storage.visualAlertsEnabled(),
     });
   }
 
   setMuted(muted: boolean): void {
     this.storage.setMuted(muted);
+  }
+
+  setVisualAlertsEnabled(enabled: boolean): void {
+    this.storage.setVisualAlertsEnabled(enabled);
   }
 
   private enterRunningPhase(cycle: number, anchor: number): void {
@@ -218,6 +235,7 @@ export class TimerEngineService {
       phaseStartedAt: null,
       phaseDurationMs: ALERT_DURATION_MS,
       muted: this.storage.muted(),
+      visualAlertsEnabled: this.storage.visualAlertsEnabled(),
     }));
   }
 
@@ -238,6 +256,7 @@ export class TimerEngineService {
       totalDurationSeconds: Math.round((this.activeSession?.durationMs ?? state.totalDurationSeconds * 1000) / 1000),
       phaseDurationMs: this.phaseDurationMs,
       muted: this.storage.muted(),
+      visualAlertsEnabled: this.storage.visualAlertsEnabled(),
     }));
   }
 

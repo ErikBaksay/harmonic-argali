@@ -81,6 +81,9 @@ export class App {
   protected readonly displayTime = computed(() => formatClock(this.displaySeconds()));
 
   protected readonly progressPercent = computed(() => Math.round(this.timerProgress() * 100));
+  protected readonly showVisualAlertPulse = computed(
+    () => this.timerState().phase === 'alert' && this.timerState().visualAlertsEnabled,
+  );
 
   protected readonly timerHeadline = computed(() => {
     const phase = this.timerState().phase;
@@ -111,7 +114,7 @@ export class App {
       case 'running':
         return 'The current interval is active and will loop automatically after the alert phase.';
       case 'alert':
-        return 'The flash and chime are signaling the transition into the next cycle.';
+        return 'The alert phase is signaling the transition into the next cycle.';
       case 'paused':
         return 'This run is paused in place and can continue from the same moment.';
       case 'completed':
@@ -335,6 +338,10 @@ export class App {
 
   protected toggleMute(): void {
     this.timer.setMuted(!this.timerState().muted);
+  }
+
+  protected toggleVisualAlerts(): void {
+    this.timer.setVisualAlertsEnabled(!this.timerState().visualAlertsEnabled);
   }
 
   protected describePreset(preset: Preset): string {
