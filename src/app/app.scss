@@ -314,7 +314,7 @@
 }
 
 .timer-stage {
-  overflow: hidden;
+  overflow: visible;
   padding: 1.15rem;
 }
 
@@ -461,6 +461,8 @@
 }
 
 .run-panel {
+  position: relative;
+  z-index: 2;
   display: grid;
   gap: 0.75rem;
   margin-bottom: 1rem;
@@ -493,7 +495,7 @@
   gap: 0.42rem;
 }
 
-.field span {
+.field__label {
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.15em;
@@ -505,8 +507,12 @@
   opacity: 0.5;
 }
 
-.field input,
-.field select {
+.field app-custom-select {
+  display: block;
+  width: 100%;
+}
+
+.field input {
   width: 100%;
   min-height: 3rem;
   padding: 0.82rem 0.95rem;
@@ -522,7 +528,7 @@
 }
 
 .field input:focus,
-.field select:focus {
+.field input:focus {
   border-color: rgba(200, 167, 96, 0.64);
   box-shadow: 0 0 0 4px rgba(200, 167, 96, 0.12);
   transform: translateY(-1px);

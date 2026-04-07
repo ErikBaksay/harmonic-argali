@@ -167,16 +167,16 @@
 
             <form class="run-settings" [formGroup]="runForm">
               <label class="field">
-                <span>Loop mode</span>
-                <select formControlName="repeatMode">
-                  <option value="preset">Use preset default</option>
-                  <option value="infinite">Repeat until stopped</option>
-                  <option value="count">Run a fixed number of cycles</option>
-                </select>
+                <span class="field__label">Loop mode</span>
+                <app-custom-select
+                  formControlName="repeatMode"
+                  [options]="runRepeatModeOptions"
+                  ariaLabel="Loop mode"
+                ></app-custom-select>
               </label>
 
               <label class="field" [class.field--hidden]="runForm.controls.repeatMode.value !== 'count'">
-                <span>Cycle count</span>
+                <span class="field__label">Cycle count</span>
                 <input formControlName="repeatCount" type="number" min="1" max="999" inputmode="numeric" />
               </label>
             </form>
@@ -251,7 +251,7 @@
             </div>
 
             <label class="field">
-              <span>Name</span>
+              <span class="field__label">Name</span>
               <input formControlName="name" type="text" placeholder="Focus sprint" maxlength="40" />
             </label>
             @if (showPresetError('name')) {
@@ -259,7 +259,7 @@
             }
 
             <label class="field">
-              <span>Duration</span>
+              <span class="field__label">Duration</span>
               <input formControlName="duration" type="text" placeholder="01:00" inputmode="numeric" />
             </label>
             @if (showPresetError('duration')) {
@@ -267,21 +267,22 @@
             }
 
             <label class="field">
-              <span>Font Awesome class</span>
+              <span class="field__label">Font Awesome class</span>
               <input formControlName="iconClass" type="text" placeholder="fa-solid fa-hourglass-half" />
             </label>
             <p class="field-note">Invalid icon classes fall back to a bell so the preset still stays usable.</p>
 
             <label class="field">
-              <span>Default repeat mode</span>
-              <select formControlName="repeatMode">
-                <option value="infinite">Repeat until stopped</option>
-                <option value="count">Fixed number of cycles</option>
-              </select>
+              <span class="field__label">Default repeat mode</span>
+              <app-custom-select
+                formControlName="repeatMode"
+                [options]="presetRepeatModeOptions"
+                ariaLabel="Default repeat mode"
+              ></app-custom-select>
             </label>
 
             <label class="field" [class.field--hidden]="presetForm.controls.repeatMode.value !== 'count'">
-              <span>Default cycle count</span>
+              <span class="field__label">Default cycle count</span>
               <input formControlName="repeatCount" type="number" min="1" max="999" inputmode="numeric" />
             </label>
             @if (showPresetError('repeatCount')) {

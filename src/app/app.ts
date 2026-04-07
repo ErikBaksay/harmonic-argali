@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
+import { CustomSelectComponent, CustomSelectOption } from './components/custom-select/custom-select';
 import { IconPreviewComponent } from './components/icon-preview/icon-preview';
 import { Preset, RepeatMode, RunOverride } from './models/timer.models';
 import { PresetStorageService } from './services/preset-storage.service';
@@ -21,7 +22,7 @@ import {
 
 @Component({
   selector: 'app-root',
-  imports: [ReactiveFormsModule, IconPreviewComponent],
+  imports: [ReactiveFormsModule, IconPreviewComponent, CustomSelectComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +56,35 @@ export class App {
     repeatMode: ['preset' as RunOverride['mode'], Validators.required],
     repeatCount: [DEFAULT_REPEAT_COUNT],
   });
+  protected readonly runRepeatModeOptions: readonly CustomSelectOption<RunOverride['mode']>[] = [
+    {
+      value: 'preset',
+      label: 'Use preset default',
+      detail: 'Follow the repeat style saved on this preset.',
+    },
+    {
+      value: 'infinite',
+      label: 'Repeat until stopped',
+      detail: 'Keep cycling continuously until you stop the timer.',
+    },
+    {
+      value: 'count',
+      label: 'Run a fixed number of cycles',
+      detail: 'End automatically after the cycle count below.',
+    },
+  ];
+  protected readonly presetRepeatModeOptions: readonly CustomSelectOption<RepeatMode>[] = [
+    {
+      value: 'infinite',
+      label: 'Repeat until stopped',
+      detail: 'This preset defaults to an endless loop.',
+    },
+    {
+      value: 'count',
+      label: 'Fixed number of cycles',
+      detail: 'This preset ends after the saved cycle count.',
+    },
+  ];
 
   protected readonly selectedPreset = computed(
     () => this.presets().find((preset) => preset.id === this.selectedPresetId()) ?? null,
